@@ -11,14 +11,14 @@ namespace InvertedFileIndexing {
 
     class LSH {
         public:
+            /* build the LSH where the image representations are dimension d
+             * and the number of hash bits (random hyperplanes) is L*/
+            LSH(int d, int n);
+
             /*generate a random hyperplane that divides the images.
              * do this by picking a random number from a gaussian
              * distribution for every dimension*/
             std::vector<double> generateRandomProjection(int dimension);
-
-            /* build the LSH where the image representations are dimension d
-             * and the number of hash bits (random hyperplanes) is L*/
-            LSH(int d, int L);
 
             /*takes an image histogram (dimension d) and a randomly projected hyperplane,
              *returns the sign: -1 if on one side, +1 if on the other side*/

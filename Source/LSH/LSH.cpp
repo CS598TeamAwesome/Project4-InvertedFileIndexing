@@ -18,7 +18,8 @@ LSH<N>::LSH(int dimension_ct){
  * source: Ravichandran et al. "Randomized Algorithms and NLP: Using Locality Sensitive Hash Function for High Speed Noun Clustering"
  */
 template<size_t N>
-std::vector<double> LSH<N>::generateRandomProjection(int K, std::default_random_engine &generator){
+std::vector<double> LSH<N>::generateRandomProjection(int K, std::default_random_engine &generator) const
+{
     std::normal_distribution<double> distribution(0.0, 1.0);
 
     std::vector<double> randomProjection;
@@ -35,7 +36,8 @@ std::vector<double> LSH<N>::generateRandomProjection(int K, std::default_random_
  * return the sign
  */
 template<size_t N>
-double LSH<N>::bithash(std::vector<double> image, std::vector<double> hyperplane){
+double LSH<N>::bithash(const std::vector<double> &image, const std::vector<double> &hyperplane) const
+{
     double dot_product = 0.0;
     //std::inner_product(image.begin(), image.end(), hyperplane.begin(), dot_product);
     // -- the std function is returning 0 for some reason

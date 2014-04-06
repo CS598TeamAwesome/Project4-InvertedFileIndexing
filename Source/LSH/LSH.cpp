@@ -1,6 +1,5 @@
 #include "LSH.hpp"
-#include <numeric>
-#include <functional>
+#include <iostream>
 
 using namespace InvertedFileIndexing;
 
@@ -44,6 +43,8 @@ double LSH<N>::bithash(const std::vector<double> &image, const std::vector<doubl
     for(int i = 0; i < image.size(); i++){
         dot_product += image[i] * hyperplane[i];
     }
+
+    std::cout << dot_product << std::endl;
 
     return std::copysign(1.0, dot_product);
 }

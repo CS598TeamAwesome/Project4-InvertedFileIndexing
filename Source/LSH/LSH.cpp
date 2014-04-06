@@ -4,8 +4,14 @@
 using namespace InvertedFileIndexing;
 
 template<size_t N>
-LSH<N>::LSH(int dimension_ct){
-    d = dimension_ct;
+LSH<N>::LSH(int dimension_ct)
+    : L(dimension_ct), d(dimension_ct)
+{    
+    std::default_random_engine generator;
+    for(int i = 0; i < N; i++)
+    {
+        L[i] = generateRandomProjection(d, generator);
+    }
 }
 
 /**

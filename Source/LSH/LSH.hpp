@@ -10,11 +10,12 @@
 
 namespace InvertedFileIndexing {
 
+    template <size_t N>
     class LSH {
         public:
             /* build the LSH where the image representations are dimension d
              * and the number of hash bits (random hyperplanes) is L*/
-            LSH(int d, int n);
+            LSH(int d);
 
             /*generate a random hyperplane that divides the images.
              * do this by picking a random number from a gaussian
@@ -26,7 +27,7 @@ namespace InvertedFileIndexing {
             double bithash(std::vector<double> image, std::vector<double> hyperplane);
 
             /*takes an image histogram, and computes the bithash against each hyperplane in L, concatenates the results into a bitset, which is the index for the image*/
-            //std::bitset<n> hash(std::vector<double> image);
+            std::bitset<N> hash(const std::vector<double> &image) const;
 
             void insert(std::vector<double> image);
 
@@ -38,7 +39,6 @@ namespace InvertedFileIndexing {
 
         private:
             int d; //dimension of image representation
-            int n; //length of hash index
             std::vector<std::vector<double>> L; //list of random projections -- these are the L bithash functions
 
             /*the bitsets are the keys and the values are the list of images mapped to the key*/

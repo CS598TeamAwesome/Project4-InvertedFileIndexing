@@ -17,18 +17,6 @@ namespace InvertedFileIndexing {
              * and the number of hash bits (random hyperplanes) is L*/
             LSH(int d);
 
-            /*generate a random hyperplane that divides the images.
-             * do this by picking a random number from a gaussian
-             * distribution for every dimension*/
-            std::vector<double> generateRandomProjection(int dimension, std::default_random_engine &generator) const;
-
-            /*takes an image histogram (dimension d) and a randomly projected hyperplane,
-             *returns the sign: -1 if on one side, +1 if on the other side*/
-            double bithash(const std::vector<double> &image, const std::vector<double> &hyperplane) const;
-
-            /*takes an image histogram, and computes the bithash against each hyperplane in L, concatenates the results into a bitset, which is the index for the image*/
-            std::bitset<N> hash(const std::vector<double> &image) const;
-
             void insert(std::vector<double> image);
 
             //gets the images from a perfect match of index - what return type?
@@ -38,6 +26,18 @@ namespace InvertedFileIndexing {
             void lookup(std::vector<double> query, int d);
 
         private:
+            /*takes an image histogram, and computes the bithash against each hyperplane in L, concatenates the results into a bitset, which is the index for the image*/
+            std::bitset<N> hash(const std::vector<double> &image) const;
+            
+            /*takes an image histogram (dimension d) and a randomly projected hyperplane,
+             *returns the sign: -1 if on one side, +1 if on the other side*/
+            double bithash(const std::vector<double> &image, const std::vector<double> &hyperplane) const;
+            
+            /*generate a random hyperplane that divides the images.
+             * do this by picking a random number from a gaussian
+             * distribution for every dimension*/
+            std::vector<double> generateRandomProjection(int dimension, std::default_random_engine &generator) const;
+            
             int d; //dimension of image representation
             std::vector<std::vector<double>> L; //list of random projections -- these are the L bithash functions
 

@@ -9,10 +9,10 @@
 #include <string>
 #include <time.h>
 #include <vector>
-#include <LSH/LSH.hpp>
+#include "LSH/LSH.hpp"
 
 void test_random_projection(){
-    InvertedFileIndexing::LSH lsh(256, 10);
+    InvertedFileIndexing::LSH<10> lsh(256);
 
     std::random_device rd;
     std::default_random_engine generator( rd() );
@@ -25,7 +25,7 @@ void test_random_projection(){
 }
 
 void test_bithash(){
-    InvertedFileIndexing::LSH lsh(10, 1);
+    InvertedFileIndexing::LSH<1> lsh(10);
 
     std::random_device rd;
     std::default_random_engine generator( rd() );

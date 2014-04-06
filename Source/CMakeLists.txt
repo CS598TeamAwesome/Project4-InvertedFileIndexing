@@ -20,3 +20,6 @@ add_subdirectory(LSH)
 
 add_library(InvertedFileIndexing ${SOURCE} ${HEADERS})
 target_link_libraries(InvertedFileIndexing ${P1_LIBRARY} ${P2_LIBRARY} ${OpenCV_LIBS})
+
+add_executable(LSH-test LSH-test.cpp)
+target_link_libraries(LSH-test InvertedFileIndexing)

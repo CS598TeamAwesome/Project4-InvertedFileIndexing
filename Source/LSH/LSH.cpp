@@ -70,3 +70,13 @@ std::bitset<N> LSH<N>::hash(const std::vector<double> &image) const
     
     return bits;
 }
+
+template<size_t N>
+std::bitset<N> LSH<N>::insert(const std::vector<double> &image)
+{
+    auto h = hash(image);
+    
+    _HashTable[h] = image;
+    
+    return h;
+}

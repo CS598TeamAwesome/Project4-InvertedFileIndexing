@@ -3,6 +3,7 @@
 #include <vector>
 #include <bitset>
 #include <random>
+#include <unordered_map>
 
 namespace InvertedFileIndexing 
 {
@@ -14,7 +15,7 @@ namespace InvertedFileIndexing
              * and the number of hash bits (random hyperplanes) is L*/
             LSH(int d);
 
-            void insert(const std::vector<double> &image);
+            std::bitset<N> insert(const std::vector<double> &image);
 
             //gets the images from a perfect match of index - what return type?
             void lookup(const std::vector<double> &query);
@@ -37,5 +38,7 @@ namespace InvertedFileIndexing
             
             int d; //dimension of image representation
             std::vector<std::vector<double>> L; //list of random projections -- these are the L bithash functions
+            
+            std::unordered_map<std::bitset<N>, std::vector<double>> _HashTable;
     };
 }

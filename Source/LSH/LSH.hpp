@@ -4,6 +4,7 @@
 #include <bitset>
 #include <cmath>
 #include <functional>
+#include <random>
 #include <vector>
 #include <stdlib.h>
 
@@ -18,11 +19,11 @@ namespace InvertedFileIndexing {
             /*generate a random hyperplane that divides the images.
              * do this by picking a random number from a gaussian
              * distribution for every dimension*/
-            std::vector<double> generateRandomProjection(int dimension);
+            std::vector<double> generateRandomProjection(int dimension, std::default_random_engine &generator);
 
             /*takes an image histogram (dimension d) and a randomly projected hyperplane,
              *returns the sign: -1 if on one side, +1 if on the other side*/
-            int hash(std::vector<double> image, std::vector<double> hyperplane);
+            double bithash(std::vector<double> image, std::vector<double> hyperplane);
 
             /*takes an image histogram, and computes the bithash against each hyperplane in L, concatenates the results into a bitset, which is the index for the image*/
             //std::bitset<n> hash(std::vector<double> image);

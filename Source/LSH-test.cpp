@@ -10,9 +10,10 @@
 #include <time.h>
 #include <vector>
 #include "LSH/LSH.hpp"
+#include "LSH/RandomProjectionAlgorithm.hpp"
 
 void test_random_projection(){
-    InvertedFileIndexing::LSH<10> lsh(256);
+    InvertedFileIndexing::RandomProjectionAlgorithm<10> lsh(256);
 
     std::random_device rd;
     std::default_random_engine generator( rd() );
@@ -25,7 +26,7 @@ void test_random_projection(){
 }
 
 void test_bithash(){
-    InvertedFileIndexing::LSH<1> lsh(10);
+    InvertedFileIndexing::RandomProjectionAlgorithm<1> lsh(10);
 
     std::random_device rd;
     std::default_random_engine generator( rd() );

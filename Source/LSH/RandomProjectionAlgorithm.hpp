@@ -27,7 +27,8 @@ namespace InvertedFileIndexing
                 std::normal_distribution<double> distribution(0.0, 1.0);
             
                 std::vector<double> randomProjection;
-                for(int i = 0; i < dimension; i++){
+                for(int i = 0; i < dimension; i++)
+                {
                     double sample = distribution(generator);
                     randomProjection.push_back(sample);
                 }
@@ -42,11 +43,10 @@ namespace InvertedFileIndexing
                 double dot_product = 0.0;
                 //std::inner_product(image.begin(), image.end(), hyperplane.begin(), dot_product);
                 // -- the std function is returning 0 for some reason
-                for(int i = 0; i < image.size(); i++){
+                for(int i = 0; i < image.size(); i++)
+                {
                     dot_product += image[i] * hyperplane[i];
                 }
-            
-                std::cout << dot_product << std::endl;
             
                 return std::copysign(1.0, dot_product);
             }

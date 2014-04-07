@@ -46,9 +46,48 @@ void test_bithash(){
     }
 }
 
+void load_histograms(std::string filename, std::vector<std::vector<double>> &histograms){
+    //load histograms from file
+    std::ifstream filein (filename);
+
+    for(int i = 0; i < 1000; i++){
+        std::string s;
+        getline(filein, s);
+        std::istringstream sin(s);
+
+        std::vector<double> histogram;
+        double d;
+        while(sin >> d){
+            histogram.push_back(d);
+        }
+        histograms.push_back(histogram);
+    }
+    filein.close();
+}
+
+void test_insert_and_lookup(){
+    std::vector<std::vector<double>> histograms;
+    load_histograms("wang_bow256_histograms", histograms);
+    InvertedFileIndexing::LSHTable<10, InvertedFileIndexing::RandomProjectionAlgorithm<10>> table(256);
+
+    std::bitset<10> bits;
+    for(int i = 0; i < histograms.size(); i++){
+        bits = table.insert(histograms[i], i);
+        std::cout << bits.to_string() << std::endl;
+    }
+
+    //testing conditions??
+
+    for(int i = 0; i < histograms.size(); i++){
+        std::vector<int> value = table.lookup(histograms[i]);
+        std::cout << value.size() << std::endl;
+    }
+}
+
 int main(int argc, char **argv)
 {
     test_random_projection();
     test_bithash();
+    test_insert_and_lookup();
     return 0;
 }

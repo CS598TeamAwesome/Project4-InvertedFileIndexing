@@ -68,20 +68,27 @@ void load_histograms(std::string filename, std::vector<std::vector<double>> &his
 void test_insert_and_lookup(){
     std::vector<std::vector<double>> histograms;
     load_histograms("wang_bow256_histograms", histograms);
-    InvertedFileIndexing::LSHTable<10, InvertedFileIndexing::RandomProjectionAlgorithm<10>> table(256);
+    InvertedFileIndexing::LSHTable<20, InvertedFileIndexing::RandomProjectionAlgorithm<20>> table(256);
 
-    std::bitset<10> bits;
+    std::bitset<20> bits;
     for(int i = 0; i < histograms.size(); i++){
         bits = table.insert(histograms[i], i);
         std::cout << bits.to_string() << std::endl;
     }
 
     //testing conditions??
+    for(int i = 0; i < 1000; i++){
+        std::vector<int> zero_distance_neighbors = table.lookup(histograms[i]);
+        std::vector<int> d_distance_neighbors = table.lookup(histograms[i], 0);
+        assert(zero_distance_neighbors.size() == d_distance_neighbors.size());
 
-    for(int i = 0; i < histograms.size(); i++){
-        std::vector<int> value = table.lookup(histograms[i]);
-        std::cout << value.size() << std::endl;
+        std::vector<int> one_distance_neighbors = table.lookup(histograms[i], 1);
+        std::cout << one_distance_neighbors.size() << " ";
+
+        std::vector<int> two_distance_neighbors = table.lookup(histograms[i], 2);
+        std::cout << two_distance_neighbors.size() << std::endl;
     }
+
 }
 
 int main(int argc, char **argv)

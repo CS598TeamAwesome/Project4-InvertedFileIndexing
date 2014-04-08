@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include <bitset>
 #include <cstdlib>
 #include <unordered_map>
@@ -44,16 +45,33 @@ namespace InvertedFileIndexing
                 std::vector<int> neighbors;
                 for (auto it = its.first; it != its.second; ++it) {
                     neighbors.push_back(it->second);
-                    std::cout << it->first << " " << it->second << std::endl;
+                    //std::cout << it->first << " " << it->second << std::endl;
                 }
 
                 return neighbors;
             }
 
             //gets all images from matches within hamming ball of radius d
-            std::vector<int> lookup(const std::vector<double> &query, int d);
+            std::vector<int> lookup(const std::vector<double> &query, int d)
+            {
+                std::bitset<N> h = hash(query);
 
-        private:            
+                std::vector<int> neighbors;
+
+                //linear scan, checking the hamming distance from the query using xor and popcount
+                //if < d, add to neighbors
+                for(auto it = _HashTable.begin(); it != _HashTable.end(); ++it){
+                    std::bitset<N> index = it->first;
+                    int distance = (index^h).count();
+                    if(distance <= d){
+                        neighbors.push_back(it->second);
+                    }
+                }
+
+                return neighbors;
+            }
+
+        private:
             Hasher hash;
             
             //the inverted file index, we need a multimap (because different histograms can have the same key)

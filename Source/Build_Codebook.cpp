@@ -36,7 +36,8 @@ int main()
 	cv::SiftFeatureDetector detector(200);
 	std::vector<cv::Mat> training_descriptors;
 	std::vector<std::vector<double>> samples;
-	for (int i = 0; i < 50; i++)
+	std::ofstream output("codebook_10k_128");
+	for (int i = 0; i < filename.size(); i++)
 	{
 		cv::Mat img;
 		std::cout << filename[i] << ": ";
@@ -56,5 +57,14 @@ int main()
 		LocalDescriptorAndBagOfFeature::convert_mat_to_vector(descriptor_double, samples);
 
 	}
+	for (int i = 0; i < samples.size(); i++)
+	{
+		for ( int j = 0; j < samples[i].size(); j++ )
+		{
+			output << samples[i][j] << " ";
+		}
+		output << std::endl;
+	}
+	output.close();
 	return 0;
 }

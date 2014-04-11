@@ -10,6 +10,7 @@
 #include <string>
 #include <time.h>
 #include <vector>
+#include <numeric>
 #include "LSH/LSH.hpp"
 #include "LSH/RandomProjectionAlgorithm.hpp"
 

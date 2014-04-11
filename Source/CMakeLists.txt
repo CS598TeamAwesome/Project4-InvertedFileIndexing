@@ -23,3 +23,15 @@ target_link_libraries(InvertedFileIndexing ${P1_LIBRARY} ${P2_LIBRARY} ${OpenCV_
 
 add_executable(LSH-test LSH-test.cpp)
 target_link_libraries(LSH-test InvertedFileIndexing)
+
+add_executable(BuildVocabularyTree BuildVocabularyTree.cpp)
+target_link_libraries(BuildVocabularyTree InvertedFileIndexing)
+
+add_executable(ComputeHistograms ComputeHistograms.cpp)
+target_link_libraries(ComputeHistograms InvertedFileIndexing)
+
+add_executable(TfIdfWeighting TfIdfWeighting.cpp)
+target_link_libraries(TfIdfWeighting InvertedFileIndexing)
+
+add_executable(TestSearch TestSearch.cpp)
+target_link_libraries(TestSearch InvertedFileIndexing)

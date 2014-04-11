@@ -1,4 +1,5 @@
 #include <array>
+#include <algorithm>
 #include <assert.h>
 #include <cmath>
 #include <cstdlib>
@@ -11,6 +12,25 @@
 #include <vector>
 #include "LSH/LSH.hpp"
 #include "LSH/RandomProjectionAlgorithm.hpp"
+
+double dot_product(std::vector<double> v1, std::vector<double> v2){
+    //std::inner_product(image.begin(), image.end(), hyperplane.begin(), dot_product);
+    double dot_product = 0.0;
+    for(int i = 0; i < v1.size(); i++)
+    {
+        dot_product += v1[i] * v2[i];
+    }
+    return dot_product;
+}
+
+double norm(std::vector<double> v){
+    double norm2 = std::accumulate(v.begin(), v.end(), 0.0, [](double accum, double elem) { return accum + elem * elem; });
+    return std::sqrt(norm2);
+}
+
+double cosine_similarity(std::vector<double> v1, std::vector<double> v2){
+    return dot_product(v1, v2)/(norm(v1) * norm(v2));
+}
 
 void test_random_projection(){
     InvertedFileIndexing::RandomProjectionAlgorithm<10> lsh(256);
@@ -66,14 +86,18 @@ void load_histograms(std::string filename, std::vector<std::vector<double>> &his
 }
 
 void test_insert_and_lookup(){
+    const int bit_size = 50;
+
     std::vector<std::vector<double>> histograms;
     load_histograms("wang_bow256_histograms", histograms);
-    InvertedFileIndexing::LSHTable<20, InvertedFileIndexing::RandomProjectionAlgorithm<20>> table(256);
+    InvertedFileIndexing::LSHTable<bit_size, InvertedFileIndexing::RandomProjectionAlgorithm<bit_size>> table(256);
 
-    std::bitset<20> bits;
+    std::vector<std::bitset<bit_size>> bit_indexes;
     for(int i = 0; i < histograms.size(); i++){
+        std::bitset<bit_size> bits;
         bits = table.insert(histograms[i], i);
         std::cout << bits.to_string() << std::endl;
+        bit_indexes.push_back(bits);
     }
 
     //testing conditions??
@@ -83,12 +107,20 @@ void test_insert_and_lookup(){
         assert(zero_distance_neighbors.size() == d_distance_neighbors.size());
 
         std::vector<int> one_distance_neighbors = table.lookup(histograms[i], 1);
-        std::cout << one_distance_neighbors.size() << " ";
+        //std::cout << one_distance_neighbors.size() << " ";
 
         std::vector<int> two_distance_neighbors = table.lookup(histograms[i], 2);
-        std::cout << two_distance_neighbors.size() << std::endl;
-    }
+        //std::cout << two_distance_neighbors.size() << std::endl;
+    }    
 
+    //plot cosine similarities against hamming distance
+    std::ofstream fileout ("distance_plot");
+    for(int i = 0; i < 1000; i++){
+        for(int j = i; j < 1000; j++){
+            fileout << cosine_similarity(histograms[i], histograms[j]) << " " << (bit_indexes[i]^bit_indexes[j]).count() << std::endl;
+        }
+    }
+    fileout.close();
 }
 
 int main(int argc, char **argv)

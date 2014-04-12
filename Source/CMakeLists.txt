@@ -39,3 +39,6 @@ target_link_libraries(TfIdfWeighting InvertedFileIndexing)
 
 add_executable(TestSearch TestSearch.cpp)
 target_link_libraries(TestSearch InvertedFileIndexing)
+
+add_executable(VisualizeResults VisualizeResults.cpp)
+target_link_libraries(VisualizeResults InvertedFileIndexing)

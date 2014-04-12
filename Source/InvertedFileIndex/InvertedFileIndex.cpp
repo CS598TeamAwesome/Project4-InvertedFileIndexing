@@ -14,6 +14,7 @@ InvertedFileIndex::InvertedFileIndex(int d){
  * adds the image_location to the inverted index entry for that word
  */
 void InvertedFileIndex::insert(const std::vector<double> &image, int image_location){
+    //CHENG, IMPLEMENT THIS
 }
 
 /*
@@ -23,6 +24,8 @@ void InvertedFileIndex::insert(const std::vector<double> &image, int image_locat
  */
 std::vector<int> InvertedFileIndex::lookup(const std::vector<double> &query, int n){
     std::vector<int> results;
+    
+    //CHENG, IMPLEMENT THIS
 
     return results;
 }

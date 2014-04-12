@@ -16,16 +16,17 @@ include_directories(${P1_INCLUDE_DIR})
 set(SOURCE)
 set(HEADERS)
 
+add_subdirectory(InvertedFileIndex)
 add_subdirectory(LSH)
 
 add_library(InvertedFileIndexing ${SOURCE} ${HEADERS})
 target_link_libraries(InvertedFileIndexing ${P1_LIBRARY} ${P2_LIBRARY} ${OpenCV_LIBS})
 
+add_executable(IFI-test IFI-test.cpp)
+target_link_libraries(IFI-test InvertedFileIndexing)
+
 add_executable(LSH-test LSH-test.cpp)
 target_link_libraries(LSH-test InvertedFileIndexing)
-
-add_executable(Build_Codebook Build_Codebook.cpp)
-target_link_libraries(Build_Codebook InvertedFileIndexing)
 
 add_executable(BuildVocabularyTree BuildVocabularyTree.cpp)
 target_link_libraries(BuildVocabularyTree InvertedFileIndexing)

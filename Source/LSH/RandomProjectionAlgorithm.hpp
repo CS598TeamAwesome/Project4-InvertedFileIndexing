@@ -47,8 +47,17 @@ namespace InvertedFileIndexing
                 {
                     dot_product += image[i] * hyperplane[i];
                 }
-            
-                return std::copysign(1.0, dot_product);
+
+                //return std::copysign(1.0, dot_product);
+                // -- copysign isn't supported in visual studio 2012
+                double sign;
+                if(dot_product < 0){
+                    sign = -1;
+                } else {
+                    sign = 1;
+                }
+
+                return sign;
             }
             
             std::bitset<N> hash(const std::vector<double> &image) const

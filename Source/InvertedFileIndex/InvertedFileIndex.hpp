@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <array>
 
 namespace InvertedFileIndexing 
 {
@@ -10,6 +11,6 @@ namespace InvertedFileIndexing
             void insert(const std::vector<double> &image, int value);
             std::vector<int> lookup(const std::vector<double> &query, int n);
         private:
-            std::vector<std::vector<double>> inverted_index;
+            std::vector<std::vector<array<int,2>>> inverted_index;
     };
 }

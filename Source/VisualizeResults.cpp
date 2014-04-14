@@ -113,7 +113,7 @@ void DisplayImg( std::vector<cv::Mat> &img )
 		windowname = "Top 12 Images";
 	}
 
-	dispimg.create( cv::Size( 60 + size*w, 20 + size*h ), CV_8UC3 );
+	dispimg.create( cv::Size( 10*(w+1) + size*w, 10*(h+1) + size*h ), CV_8UC3 );
 	for ( int i = 0, m = 10, n = 10; i < num_img; i++, m += (10 + size) )
 	{
 		x = img[i].cols;

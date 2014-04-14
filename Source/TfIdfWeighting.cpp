@@ -38,6 +38,9 @@ void load_histograms(std::string filename, std::vector<std::vector<double>> &his
     std::ifstream filein (filename);
 
     for(int i = 0; i < 1000; i++){
+        if(!filein){
+            break;
+        }
         std::string s;
         getline(filein, s);
         std::istringstream sin(s);
@@ -59,7 +62,7 @@ int main(int argc, char **argv)
     int hist_size = 10000;
 
     std::vector<std::vector<double>> histograms;
-    for(int i = 0; i < 10; i++){
+    for(int i = 0; i < 11; i++){
         std::ostringstream convert;
         convert << "histograms/" << i << ".txt";
         std::string s = convert.str();

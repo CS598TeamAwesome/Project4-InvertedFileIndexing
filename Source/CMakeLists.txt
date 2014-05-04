@@ -42,3 +42,6 @@ target_link_libraries(TestSearch InvertedFileIndexing)
 
 add_executable(VisualizeResults VisualizeResults.cpp)
 target_link_libraries(VisualizeResults InvertedFileIndexing)
+
+add_executable(OnlineSearch OnlineSearch.cpp)
+target_link_libraries(OnlineSearch InvertedFileIndexing)

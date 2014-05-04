@@ -6,6 +6,8 @@
 #include <Feature/ColorHistogram.hpp>
 #include <Feature/HistogramOfOrientedGradients.hpp>
 #include <BagOfFeatures/Codewords.hpp>
+#include <Quantization/HardAssignment.hpp>
+#include <Quantization/CodewordUncertainty.hpp>
 #include <Quantization/VocabularyTreeQuantization.hpp>
 #include <Util/Clustering.hpp>
 #include <Util/Types.hpp>
@@ -51,26 +53,32 @@ int main(int argc, char **argv)
 
     std::string detector_type = "SIFT";
     cv::Ptr<cv::FeatureDetector> detector = cv::FeatureDetector::create(detector_type);
-    detector->set("nFeatures", 200);
+    detector->set("nFeatures", 400);
 
     cv::Ptr<cv::FeatureDetector> detector2 = cv::FeatureDetector::create("MSER");
 
     cv::SiftDescriptorExtractor extractor;
 
-    BagOfFeatures feature_set;
-
     vocabulary_tree tree;
-    LoadVocabularyTree("labelme_vocabulary10k.out", tree);
+    LoadVocabularyTree("vocabulary10k.out", tree);
+/*
+    std::vector<std::vector<double>> codebook;
+    FlattenTree(tree, codebook);
+    std::cout << codebook.size() << std::endl;
 
+    HardAssignment hard_quant(codebook);
+    CodewordUncertainty soft_quant(codebook, 100.0);
+*/
     VocabularyTreeQuantization tree_quant(tree);
 
-    std::vector<Histogram> image_histograms;
-
+    std::ofstream outputFile;
+    double total_keypoints = 0.0;
+    double total_fingerprint = 0.0;
     int i = 0;
     for(std::string& imFile : image_files){
-        i++;
         std::cout << "computing histogram for img " << i << " of " << image_files.size();
 
+        double start = clock();
         cv::Mat img = cv::imread(imFile);
 
         //detect keypoints SIFT
@@ -85,7 +93,8 @@ int main(int argc, char **argv)
             keypoints.push_back(keypoint);
         }
 
-         std::cout << " - keypoint_ct: " << keypoints.size() << std::endl;
+        std::cout << " - keypoint_ct: " << keypoints.size() << std::endl;
+        total_keypoints += keypoints.size();
 
         //compute descriptors
         cv::Mat descriptor_uchar;
@@ -101,28 +110,14 @@ int main(int argc, char **argv)
         //quantize to form bag of words
         Histogram bag_of_words;
         tree_quant.quantize(unquantized_features, bag_of_words);
+        //hard_quant.quantize(unquantized_features, bag_of_words);
+        //soft_quant.quantize(unquantized_features, bag_of_words);
 
-        image_histograms.push_back(bag_of_words);
-    }
+        //image_histograms.push_back(bag_of_words);
+        double fingerprint_time = double( clock() - start ) / (double)CLOCKS_PER_SEC;
+        total_fingerprint += fingerprint_time;
+        std::cout << "time for image - " << fingerprint_time << std::endl;
 
-/*
-    std::vector<Histogram> image_histograms;
-    ColorHistogram ch;
-
-    int i = 0;
-    for(std::string& imFile : image_files){
-        i++;
-        std::cout << "computing histogram for img " << i << " of " << image_files.size() << std::endl;
-
-        cv::Mat img = cv::imread(imFile);
-
-        Histogram color_hist = ch.Compute(img);
-        image_histograms.push_back(color_hist);
-    }
-*/
-    //write image histograms to file(s), 1000 in each file, sparse-format
-    std::ofstream outputFile;
-    for(int i = 0; i < image_histograms.size(); i++){
         if(i%1000 == 0){
             //open new outputFile
             if(outputFile.is_open()){
@@ -130,20 +125,30 @@ int main(int argc, char **argv)
             }
 
             std::ostringstream convert;
+
+            //the histograms folder is expected to already exist
             convert << "histograms/" << i/1000 << ".txt";
             std::string s = convert.str();
 
             outputFile.open(s);
         }
-        for(int j = 0; j < image_histograms[i].size(); j++){
-            if(image_histograms[i][j] > 0)
-                outputFile << j << " " << image_histograms[i][j] << " ";
+
+        //stored using sparse format - index and value separated by a space
+        for(int j = 0; j < bag_of_words.size(); j++){
+            if(bag_of_words[j] > 0)
+                outputFile << j << " " << bag_of_words[j] << " ";
         }
         outputFile << std::endl;
 
+        i++;
     }
+
+    std::cout << "avg. keypoints per image: " << total_keypoints / image_files.size() << std::endl;
+    std::cout << "avg. fingerprint time per image: " << total_fingerprint / image_files.size() << std::endl;
+
     if(outputFile.is_open()){
         outputFile.close();
     }
+
     return 0;
 }

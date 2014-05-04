@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <random>
 #include <sstream>
 #include <string>
@@ -14,26 +15,15 @@
 #include "LSH/LSH.hpp"
 #include "LSH/RandomProjectionAlgorithm.hpp"
 
-double dot_product(std::vector<double> v1, std::vector<double> v2){
-    //std::inner_product(image.begin(), image.end(), hyperplane.begin(), dot_product);
-    double dot_product = 0.0;
-    for(int i = 0; i < v1.size(); i++)
-    {
-        dot_product += v1[i] * v2[i];
+double sparse_norm(std::map<int, double> m){
+    double norm2 = 0.0;
+    for(auto &p : m){
+        norm2 += p.second * p.second;
     }
-    return dot_product;
-}
-
-double norm(std::vector<double> v){
-    double norm2 = std::accumulate(v.begin(), v.end(), 0.0, [](double accum, double elem) { return accum + elem * elem; });
     return std::sqrt(norm2);
 }
 
-double cosine_similarity(std::vector<double> v1, std::vector<double> v2){
-    return dot_product(v1, v2)/(norm(v1) * norm(v2));
-}
-
-void load_histograms(std::string filename, std::vector<std::vector<double>> &histograms, int size){
+void load_histograms(std::string filename, std::vector<std::map<int, double>> &histograms){
     //load histograms from file
     std::ifstream filein (filename);
 
@@ -45,42 +35,48 @@ void load_histograms(std::string filename, std::vector<std::vector<double>> &his
         getline(filein, s);
         std::istringstream sin(s);
 
-        std::vector<double> histogram(size);
+        std::map<int, double> histogram_map;
         double index;
         double value;
         while(sin >> index){
             sin >> value;
-            histogram[index] = value;
+            std::pair<int, double> key_value_pair;
+            key_value_pair.first = index;
+            key_value_pair.second = value;
+            histogram_map.insert(key_value_pair);
         }
-        histograms.push_back(histogram);
+
+        if(histogram_map.size() > 0)
+            histograms.push_back(histogram_map);
     }
     filein.close();
 }
 
 int main(int argc, char **argv)
 {
-    int hist_size = 10000;
+    int dataset_size = std::atoi(argv[1]); //number of histogram files to convert to tf-idf weighting
+    int hist_size = 10000; //number of codewords in vocabulary
 
-    std::vector<std::vector<double>> histograms;
-    for(int i = 0; i < 11; i++){
+    std::vector<std::map<int, double>> histograms;
+    for(int i = 0; i < dataset_size; i++){
         std::ostringstream convert;
         convert << "histograms/" << i << ".txt";
         std::string s = convert.str();
         std::cout << s << std::endl;
-        load_histograms(s, histograms, hist_size);
+        load_histograms(s, histograms);
     }
 
     //do a document frequency count
-    int vocabulary_size = histograms[0].size();
+    int vocabulary_size = hist_size;
     std::vector<double> document_frequency(vocabulary_size);
     for(int i = 0; i < histograms.size(); i++){
-        for(int j = 0; j < histograms[i].size(); j++){
-            if(histograms[i][j] > 0){
-                document_frequency[j]++;
-            }
+        //iterate over each map
+        for(auto p : histograms[i]){
+            document_frequency[p.first]++;
         }
     }
 
+    std::cout << document_frequency.size() << std::endl;
     std::ofstream out("document_frequencies.txt");
     for(int i = 0; i < document_frequency.size(); i++){
         out << document_frequency[i] << " ";
@@ -91,11 +87,19 @@ int main(int argc, char **argv)
 
     //weight each histogram using tfidf
     for(int i = 0; i < histograms.size(); i++){
-        for(int j = 0; j < histograms[i].size(); j++){
-            if(histograms[i][j] > 0){
-                double tf = 1 + std::log(histograms[i][j]);
-                double idf = std::log(total_docs/document_frequency[j]);
-                histograms[i][j] = tf*idf;
+        for(auto& p : histograms[i]){
+            double tf = 1 + std::log(p.second);
+            double idf = std::log(total_docs/document_frequency[p.first]);
+            p.second = tf*idf;
+        }
+    }
+
+    //normalize each histogram
+    for(int i = 0; i < histograms.size(); i++){
+        double norm = sparse_norm(histograms[i]);
+        if(norm != 0){
+            for(auto& p : histograms[i]){
+                    p.second = p.second/norm;
             }
         }
     }
@@ -115,12 +119,10 @@ int main(int argc, char **argv)
 
             outputFile.open(s);
         }
-        for(int j = 0; j < histograms[i].size(); j++){
-            if(histograms[i][j] != 0)
-            outputFile << j << " " << histograms[i][j] << " ";
+        for(auto p : histograms[i]){
+            outputFile << p.first << " " << p.second << " ";
         }
         outputFile << std::endl;
-
     }
 
     std::cout << histograms.size() << std::endl;

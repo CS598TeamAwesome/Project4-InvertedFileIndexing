@@ -44,22 +44,31 @@ int main(int argc, char **argv)
     std::vector<std::string> image_files = load_image_paths(argv[1]);
     std::cout << image_files.size() << std::endl;
 
+    // SIFT detector capped at 400 features per image
     std::string detector_type = "SIFT";
     cv::Ptr<cv::FeatureDetector> detector = cv::FeatureDetector::create(detector_type);
-    detector->set("nFeatures", 200);
+    detector->set("nFeatures", 400);
 
+    // MSER detector
+    cv::Ptr<cv::FeatureDetector> detector2 = cv::FeatureDetector::create("MSER");
+
+    // SIFT extratctor
     cv::SiftDescriptorExtractor extractor;
 
     BagOfFeatures feature_set;
 
+    // For a random subset of images in the image file list:
+    // 1. load image into Mat
+    // 2. gather SIFT and MSER keypoints
+    // 3. compute SIFT descriptors and add them to the aggregate feature list
     int i = 0;
     for(std::string& imFile : image_files){
         i++;
-        /* --- if memory is an issue, only collect features on a random subset of images
-        if(std::rand()%2 == 0){
+        // --- if memory or run-time is an issue, only collect features on a random subset of images
+        if(std::rand()%3 != 0){ //this will skip 2/3 of the images
             continue;
         }
-        */
+
         std::cout << "detecting keypoints and computing descriptors for img " << i << " of " << image_files.size() << std::endl;
 
         cv::Mat img = cv::imread(imFile);
@@ -67,6 +76,15 @@ int main(int argc, char **argv)
         //detect keypoints
         std::vector<cv::KeyPoint> keypoints;
         detector->detect( img, keypoints );
+
+        std::vector<cv::KeyPoint> keypoints2;
+        detector2->detect( img, keypoints2);
+
+        std::cout << keypoints.size() << " " << keypoints2.size() << std::endl;
+
+        for(cv::KeyPoint& keypoint : keypoints2){
+            keypoints.push_back(keypoint);
+        }
 
         //compute descriptors
         cv::Mat descriptor_uchar;
@@ -87,62 +105,16 @@ int main(int argc, char **argv)
 
     std::cout << "total number of features: " << feature_set.size() << std::endl;
     double start;
-/*
+
+    // Clustering using Hierarchical K-means
     start = clock();
-    std::cout << "Build Vocabulary Tree for " << samples.size() << " features" << std::endl;
-    vocabulary_tree tree; //(4^4) = 256 words
-    tree.K = 4; //branching factor
+    vocabulary_tree tree; //10k
+    tree.K = 10; //branching factor
     tree.L = 4; //depth
-    hierarchical_kmeans(samples, tree);
+    hierarchical_kmeans(feature_set, tree);
     std::cout << double( clock() - start ) / (double)CLOCKS_PER_SEC<< " seconds." << std::endl;
 
-    SaveVocabularyTree("universal_vocabulary256.out", tree);
+    SaveVocabularyTree("vocabulary10k.out", tree);
 
-
-    start = clock();
-    vocabulary_tree tree2; //625
-    tree2.K = 5; //branching factor
-    tree2.L = 4; //depth
-    hierarchical_kmeans(feature_set, tree2);
-    std::cout << double( clock() - start ) / (double)CLOCKS_PER_SEC<< " seconds." << std::endl;
-
-    SaveVocabularyTree("labelme_vocabulary625.out", tree2);
-*/
-    start = clock();
-    vocabulary_tree tree3; //1k
-    tree3.K = 10; //branching factor
-    tree3.L = 3; //depth
-    hierarchical_kmeans(feature_set, tree3);
-    std::cout << double( clock() - start ) / (double)CLOCKS_PER_SEC<< " seconds." << std::endl;
-
-    SaveVocabularyTree("labelme_vocabulary1000.out", tree3);
-
-    start = clock();
-    vocabulary_tree tree4; //10k
-    tree4.K = 10; //branching factor
-    tree4.L = 4; //depth
-    hierarchical_kmeans(feature_set, tree4);
-    std::cout << double( clock() - start ) / (double)CLOCKS_PER_SEC<< " seconds." << std::endl;
-
-    SaveVocabularyTree("labelme_vocabulary10k.out", tree4);
-
-    start = clock();
-    vocabulary_tree tree5; //8^5, 32k
-    tree5.K = 8; //branching factor
-    tree5.L = 5; //depth
-    hierarchical_kmeans(feature_set, tree5);
-    std::cout << double( clock() - start ) / (double)CLOCKS_PER_SEC<< " seconds." << std::endl;
-
-    SaveVocabularyTree("labelme_vocabulary32k.out", tree5);
-/*
-    start = clock();
-    vocabulary_tree tree6; //9^5, 60k
-    tree6.K = 9; //branching factor
-    tree6.L = 5; //depth
-    hierarchical_kmeans(feature_set, tree6);
-    std::cout << double( clock() - start ) / (double)CLOCKS_PER_SEC<< " seconds." << std::endl;
-
-    SaveVocabularyTree("labelme_vocabulary60k.out", tree6);
-*/
     return 0;
 }

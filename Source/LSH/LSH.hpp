@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <bitset>
 #include <cstdlib>
+#include <map>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -32,6 +33,16 @@ namespace InvertedFileIndexing
                 std::pair<std::bitset<N>,int> key_value_pair(h, value);
                 _HashTable.insert(key_value_pair);
                 
+                return h;
+            }
+
+            std::bitset<N> insert(const std::map<int, double> &image, int value)
+            {
+                auto h = hash(image);
+
+                std::pair<std::bitset<N>,int> key_value_pair(h, value);
+                _HashTable.insert(key_value_pair);
+
                 return h;
             }
 
@@ -71,6 +82,26 @@ namespace InvertedFileIndexing
                 return neighbors;
             }
 
+            //gets all images from matches within hamming ball of radius d
+            std::vector<int> lookup(const std::map<int, double> &query, int d)
+            {
+                std::bitset<N> h = hash(query);
+
+                std::vector<int> neighbors;
+
+                //linear scan, checking the hamming distance from the query using xor and popcount
+                //if < d, add to neighbors
+                for(auto it = _HashTable.begin(); it != _HashTable.end(); ++it){
+                    std::bitset<N> index = it->first;
+                    int distance = (index^h).count();
+                    if(distance <= d){
+                        neighbors.push_back(it->second);
+                    }
+                }
+
+                return neighbors;
+            }
+
         private:
             Hasher hash;
             
@@ -91,8 +122,14 @@ namespace InvertedFileIndexing
             
             /*takes an image histogram, and computes the bithash against each hyperplane in L, concatenates the results into a bitset, which is the index for the image*/
             virtual std::bitset<N> hash(const std::vector<double> &image) const = 0;
+            virtual std::bitset<N> hash(const std::map<int, double> &image) const = 0;
             
             std::bitset<N> operator() (const std::vector<double> &image) const
+            {
+                return hash(image);
+            }
+
+            std::bitset<N> operator() (const std::map<int, double> &image) const
             {
                 return hash(image);
             }

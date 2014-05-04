@@ -59,6 +59,29 @@ namespace InvertedFileIndexing
 
                 return sign;
             }
+
+            /*takes a sparse image histogram (a map) and a randomly projected hyperplane,
+             *returns the sign: -1 if on one side, +1 if on the other side*/
+            double bithash(const std::map<int, double> &image, const std::vector<double> &hyperplane) const
+            {
+                double dot_product = 0.0;
+                //std::inner_product(image.begin(), image.end(), hyperplane.begin(), dot_product);
+                // -- the std function is returning 0 for some reason
+                for(auto &p : image){
+                    dot_product += p.second * hyperplane[p.first];
+                }
+
+                //return std::copysign(1.0, dot_product);
+                // -- copysign isn't supported in visual studio 2012
+                double sign;
+                if(dot_product < 0){
+                    sign = -1;
+                } else {
+                    sign = 1;
+                }
+
+                return sign;
+            }
             
             std::bitset<N> hash(const std::vector<double> &image) const
             {
@@ -72,6 +95,21 @@ namespace InvertedFileIndexing
                     bits[i] = sign > 0;
                 }
                 
+                return bits;
+            }
+
+            std::bitset<N> hash(const std::map<int, double> &image) const
+            {
+                std::bitset<N> bits;
+
+                for(int i = 0; i < L.size(); i++)
+                {
+                    auto hyperplane = L[i];
+
+                    double sign = bithash(image, hyperplane);
+                    bits[i] = sign > 0;
+                }
+
                 return bits;
             }
             
